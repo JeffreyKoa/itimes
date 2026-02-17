@@ -55,6 +55,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -231,12 +232,14 @@ fun TodayDecisionPanel(
 
     // 提醒弹窗状态
     var reminderDialogTask by remember { mutableStateOf<TaskUiModel?>(null) }
+    val reminderQueue = remember { mutableStateListOf<TaskUiModel>() }
 
     // 动态倒计时：每秒刷新一次
     var currentSecond by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
     
     // 记录已播放提示音的任务ID（避免重复播放）
     var notifiedTaskIds by remember { mutableStateOf(setOf<Long>()) }
+    var snoozedReminderUntil by remember { mutableStateOf<Map<Long, Long>>(emptyMap()) }
     
     // DatePicker Logic
     val calendar = Calendar.getInstance()
@@ -264,32 +267,44 @@ fun TodayDecisionPanel(
     }
 
     // 根据当前时间过滤需要提醒的任务
-    val activeReminders = remember(tasksWithReminder, currentSecond) {
+    val currentTimeMillis = currentSecond * 1000
+    val activeReminders = remember(tasksWithReminder, currentSecond, snoozedReminderUntil) {
         tasksWithReminder
-            .filter { it.shouldShowReminder() }
+            .filter { task ->
+                task.shouldShowReminder() && (snoozedReminderUntil[task.id] ?: 0L) <= currentTimeMillis
+            }
             .sortedBy { it.getEffectiveDueTimestamp() ?: Long.MAX_VALUE }
+    }
+
+    fun showNextReminderDialogIfNeeded() {
+        if (reminderDialogTask != null) return
+        val nextTask = reminderQueue.removeFirstOrNull() ?: return
+        reminderDialogTask = nextTask
     }
     
     // 检查是否有新任务需要提醒，播放提示音并弹出对话框
     LaunchedEffect(activeReminders) {
         val currentIds = activeReminders.map { it.id }.toSet()
-        val newReminders = currentIds - notifiedTaskIds
+        val queueIds = reminderQueue.map { it.id }.toSet()
+        val newReminderTasks = activeReminders.filter { it.id !in notifiedTaskIds && it.id !in queueIds }
         
-        if (newReminders.isNotEmpty()) {
+        if (newReminderTasks.isNotEmpty()) {
             // 有新的提醒任务，播放提示音
             playNotificationSound(context)
+            reminderQueue.addAll(newReminderTasks)
             // 更新已通知的任务ID
-            notifiedTaskIds = notifiedTaskIds + newReminders
-            
-            // 弹出第一个新提醒任务的对话框
-            val firstNewTask = activeReminders.find { it.id in newReminders }
-            if (firstNewTask != null && reminderDialogTask == null) {
-                reminderDialogTask = firstNewTask
-            }
+            notifiedTaskIds = notifiedTaskIds + newReminderTasks.map { it.id }
         }
         
         // 清理已不在提醒列表中的任务ID（任务完成或被删除）
         notifiedTaskIds = notifiedTaskIds.intersect(currentIds)
+        reminderQueue.removeAll { it.id !in currentIds }
+        snoozedReminderUntil = snoozedReminderUntil.filterValues { it > currentTimeMillis }
+
+        if (reminderDialogTask?.id !in currentIds) {
+            reminderDialogTask = null
+        }
+        showNextReminderDialogIfNeeded()
     }
 
     // 提醒弹窗
@@ -299,17 +314,23 @@ fun TodayDecisionPanel(
             onComplete = {
                 onCompleteTask(task.id)
                 reminderDialogTask = null
+                showNextReminderDialogIfNeeded()
             },
             onSnooze = {
-                // 简单关闭，下次刷新时如果还在提醒时间内会再次显示
+                val snoozeUntil = System.currentTimeMillis() + 5 * 60 * 1000L
+                snoozedReminderUntil = snoozedReminderUntil + (task.id to snoozeUntil)
+                notifiedTaskIds = notifiedTaskIds - task.id
                 reminderDialogTask = null
+                showNextReminderDialogIfNeeded()
             },
             onViewDetails = {
                 onEditTask(task.id)
                 reminderDialogTask = null
+                showNextReminderDialogIfNeeded()
             },
             onDismiss = {
                 reminderDialogTask = null
+                showNextReminderDialogIfNeeded()
             }
         )
     }

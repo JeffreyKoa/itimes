@@ -51,10 +51,10 @@ interface TaskDao {
     suspend fun deleteById(id: Long)
 
     // MIT 相关查询
-    @Query("SELECT * FROM tasks WHERE isMIT = 1 AND status != 2 LIMIT 1")
+    @Query("SELECT * FROM tasks WHERE isMIT = 1 AND status != 1 LIMIT 1")
     fun observeMIT(): Flow<TaskEntity?>
 
-    @Query("SELECT * FROM tasks WHERE isMIT = 1 AND status != 2 LIMIT 1")
+    @Query("SELECT * FROM tasks WHERE isMIT = 1 AND status != 1 LIMIT 1")
     suspend fun getMIT(): TaskEntity?
 
     @Query("UPDATE tasks SET isMIT = 0 WHERE isMIT = 1")
@@ -64,7 +64,7 @@ interface TaskDao {
     suspend fun setMIT(id: Long)
 
     // 所有未完成任务（用于今日决策统计）
-    @Query("SELECT * FROM tasks WHERE status != 2")
+    @Query("SELECT * FROM tasks WHERE status != 1")
     fun observeAllActiveTasks(): Flow<List<TaskEntity>>
 
     // 按象限查询今天的任务（截止日期是今天或之前，或者没有截止日期，或者创建时间是今天）
@@ -72,7 +72,7 @@ interface TaskDao {
         """
         SELECT * FROM tasks
         WHERE quadrant = :quadrant 
-        AND status != 2
+        AND status != 1
         AND (
             dueEpochDay IS NULL 
             OR dueEpochDay <= :todayEpochDay
@@ -105,7 +105,7 @@ interface TaskDao {
     @Query(
         """
         SELECT * FROM tasks
-        WHERE status != 2 
+        WHERE status != 1 
         AND reminderEnabled = 1
         AND dueTimestamp IS NOT NULL
         ORDER BY dueTimestamp ASC
@@ -132,7 +132,7 @@ interface TaskDao {
     @Query(
         """
         SELECT * FROM tasks
-        WHERE status NOT IN (2, 4)
+        WHERE status NOT IN (1, 2)
         AND dueTimestamp IS NOT NULL
         AND dueTimestamp < :currentTime
         """
@@ -140,7 +140,7 @@ interface TaskDao {
     suspend fun getOverdueTasks(currentTime: Long): List<TaskEntity>
 
     // 批量更新任务状态为已过期
-    @Query("UPDATE tasks SET status = 4, updatedAt = :now WHERE id IN (:ids)")
+    @Query("UPDATE tasks SET status = 2, updatedAt = :now WHERE id IN (:ids)")
     suspend fun updateTasksToOverdue(ids: List<Long>, now: Long)
 }
 
