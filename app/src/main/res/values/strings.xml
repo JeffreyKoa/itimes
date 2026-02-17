@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">象限任务管理器</string>
+
+    <!-- Top bar / update -->
+    <string name="title_home">象限任务管理器</string>
+    <string name="action_check_update">检查更新</string>
+    <string name="update_url_not_configured">未配置更新地址：请修改 update_json_url</string>
+    <string name="update_check_failed">检查更新失败：网络或地址不可用</string>
+    <string name="update_already_latest">已是最新版本</string>
+    <string name="update_found_title">发现新版本：%1$s</string>
+    <string name="update_found_default_notes">已发布新版本，建议更新以获得更好的体验。</string>
+    <string name="update_now">立即更新</string>
+    <string name="update_later">稍后</string>
+
+    <!-- Quadrant panel -->
+    <string name="tasks_count">任务：%1$d</string>
+    <string name="action_add_task">新增任务</string>
+    <string name="empty_tasks">暂无任务</string>
+    <string name="empty_q1">太棒了！目前没有火烧眉毛的事。</string>
+    <string name="empty_q2">把重要但不紧急的事安排起来，你会更从容。</string>
+    <string name="empty_q3">这一象限先清空，能少很多干扰。</string>
+    <string name="empty_q4">留白也是生产力，先专注真正重要的事。</string>
+
+    <!-- Task card -->
+    <string name="action_more">更多操作</string>
+    <string name="action_pin">置顶</string>
+    <string name="action_unpin">取消置顶</string>
+    <string name="menu_move_to">移动到</string>
+    <string name="menu_status">状态</string>
+    <string name="menu_sort">排序</string>
+    <string name="action_complete">完成</string>
+    <string name="action_defer_one_day">推迟一天</string>
+    <string name="action_delete">删除</string>
+    <string name="action_move_up">上移</string>
+    <string name="action_move_down">下移</string>
+    <string name="due_prefix">截止：%1$s</string>
+    <string name="delete_confirm_title">删除任务？</string>
+    <string name="delete_confirm_text">“%1$s” 将被删除，且无法恢复。</string>
+    <string name="action_cancel">取消</string>
+
+    <!-- Undo -->
+    <string name="task_deleted">已删除任务</string>
+    <string name="action_undo">撤销</string>
+    <string name="undo_failed">撤销失败：%1$s</string>
+
+    <!-- Editor -->
+    <string name="editor_create_title">新增任务</string>
+    <string name="editor_edit_title">编辑任务</string>
+    <string name="field_title_required">标题（必填）</string>
+    <string name="error_title_empty">标题不能为空</string>
+    <string name="field_description">描述</string>
+    <string name="field_estimated_minutes">预计耗时（分钟）</string>
+    <string name="field_tags">标签（逗号分隔）</string>
+    <string name="field_due_date">截止日期（可选）</string>
+    <string name="action_pick_date">选择日期</string>
+    <string name="action_clear_date">清空日期</string>
+    <string name="label_quadrant">象限：</string>
+    <string name="label_status">状态：</string>
+    <string name="action_save">保存</string>
+</resources>
+
+

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 你发布新版本时，把服务器上的 update.json 放到这个 URL，并保持字段约定一致 -->
+    <string name="update_json_url">https://your-domain.com/xltool/update.json</string>
+</resources>
+
+
